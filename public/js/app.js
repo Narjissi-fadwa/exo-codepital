@@ -24,22 +24,41 @@ class Patients {
         this.treatment = treatment
     }
     GoTo(prevlocation, destination) {
-        destination.people.push(this)
-        prevlocation.people.pop(this)
-        console.log(this.name + " khrej mn " + prevlocation.name);
-        console.log(this.name + " mcha l " + destination.name);
-        
+        destination.push(this)
+        prevlocation.pop(this)
+        // console.log(this.name + " khrej mn " + prevlocation.name);
+        // console.log(this.name + " mcha l " + destination.name);
+
     }
     pay(treatment) {
-
+        console.log(this.name + ' curently in the pharmacy');
+        for (let i = 0; i < Pharmacy.products.length; i++) {
+            if (this.illness == Pharmacy.products[i].illnessName) {
+                if (this.money >= Pharmacy.products[i].price) {
+                    this.money -= Pharmacy.products[i].price
+                    Pharmacy.products[i].money += Pharmacy.products[i].price
+                    console.log(this.name + "has left" + this.money);
+                    this.healthState = 'well'
+                    this.pocket.push(this.money)
+                    console.log("has in pocket " + this.pocket);
+                    break;
+                } else {
+                    this.GoTo(Pharmacy.people, cemetry.people)
+                    this.healthState = 'dead'
+                    console.log(this.name +' allah yerahmo ' + this.healthState);
+                    break;
+                }
+            }
+        }
     }
-}
+    
+    }
 
-let Marcus = new Patients("Marcus", "IndentationError", 100, "Empty", "Ill", []);
-let Optimus = new Patients("Optimus", "Unsave", 200, "Empty", "Ill", []);
-let Sangoku = new Patients("Sangoku", "404", 80, "Empty", "Ill", []);
-let DarthVader = new Patients("DarthVader", "Asthmatic", 110, "Empty", "Ill", []);
-let Semicolon = new Patients("Semicolon", "SyntaxError", 60, "Empty", "Ill", []);
+let Marcus = new Patients("Marcus", "IndentationError", 100, [], "Ill", []);
+let Optimus = new Patients("Optimus", "Unsave", 200, [], "Ill", []);
+let Sangoku = new Patients("Sangoku", "404", 80, [], "Ill", []);
+let DarthVader = new Patients("DarthVader", "Asthmatic", 110, [], "Ill", []);
+let Semicolon = new Patients("Semicolon", "SyntaxError", 60, [], "Ill", []);
 
 // ## Description of the doctor:
 
@@ -50,7 +69,7 @@ let Semicolon = new Patients("Semicolon", "SyntaxError", 60, "Empty", "Ill", [])
 // | Debugger  | 0     | [Cat]  |            |            |             |
 
 class Doctor {
-    constructor(name, money, office, waitingroom , consultationroom) {
+    constructor(name, money, office, waitingroom, consultationroom) {
         this.name = name
         this.money = money
         this.office = office
@@ -70,16 +89,17 @@ class Doctor {
         if (this.consultationroom.people.length == 0) {
             this.consultationroom.people.push(patient);
             console.log(patient.name + " in the " + this.consultationroom.name);
-            // this.waitingroom.people.splice(patient , 1);
-        }else{
+        } else {
             this.waitingroom.people.push(patient);
             console.log(patient.name + " in the " + this.waitingroom.name);
         }
-        
+
     }
     Patientout(patient) {
-        this.waitingroom.people.push(patient);
-        this.consultationroom.people.splice(patient , 1);
+        this.money += 50
+        patient.money -= 50
+        console.log(patient.name + " pay 50€");
+        this.consultationroom.people.splice(patient, 1);
         console.log(patient.name + " out of " + this.consultationroom.name);
 
     }
@@ -93,10 +113,10 @@ let office = {
     people: []
 }
 let consultationroom = {
-    name : "consultationroom",
+    name: "consultationroom",
     people: [],
 }
-const doctor = new Doctor("Debugger", 0, office , waitingroom , consultationroom);
+const doctor = new Doctor("Debugger", 0, office, waitingroom, consultationroom);
 
 // ### Diagnosis Grid:
 
@@ -148,14 +168,17 @@ let home = {
     name: "home",
     people: [Marcus, Optimus, Sangoku, DarthVader, Semicolon]
 }
-
-Marcus.GoTo(home , doctor.office)
+let cemetry = {
+    name: "RIP",
+    people: [],
+}
+Marcus.GoTo(home.people, doctor.office.people)
 doctor.PatientIn(Marcus)
 
-Optimus.GoTo(home , doctor.office)
+Optimus.GoTo(home.people, doctor.office.people)
 doctor.PatientIn(Optimus)
-
-
+doctor.Patientout(Marcus)
+Marcus.pay('Ctrl+Shift+F')
 // doctor.diagnosis(Optimus)
 // doctor.waitingroom.people.push(Marcus)
 // Patients will then go to the pharmacy and receive their treatment if they have enough money. If they have enough money, they will be in good health; otherwise, they will be dead, and you will need to push them into a cemetery.
