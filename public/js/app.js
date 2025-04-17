@@ -1,19 +1,4 @@
 //! Welcome to Codepital:
-
-//? In this exercise, we have patients who will go to a doctor to get debugged. The doctor will diagnose them and prescribe a remedy. After that, the patients will go to the pharmacy to buy their remedy, take it, and be cured.
-
-// ## Description of patients:
-
-// Patients have a name, an illness, money, a pocket, a health condition, knowledge of how to go to a place, take medication, and pay. At the beginning, patients are in a waiting room.
-
-// | Name      | Illness              | Money | Pocket | Health State | Treatment              | Go To | Take Care | Pay |
-// |-----------|----------------------|-------|--------|--------------|------------------------|-------|-----------|-----|
-// | Marcus    | Indentation Error    | 100   | Empty  | Ill          |                        |       |           |     |
-// | Optimus   | Unsave               | 200   | Empty  | Ill          |                        |       |           |     |
-// | Sangoku   | 404                  | 80    | Empty  | Ill          |                        |       |           |     |
-// | DarthVader| Asthmatic            | 110   | Empty  | Ill          |                        |       |           |     |
-// | Semicolon | Syntax Error         | 60    | Empty  | Ill          |                        |       |           |     |
-
 class Patients {
     constructor(name, illness, money, pocket, healthState, treatment) {
         this.name = name
@@ -24,28 +9,28 @@ class Patients {
         this.treatment = treatment
     }
     GoTo(prevlocation, destination) {
-        destination.push(this)
-        prevlocation.pop(this)
-        // console.log(this.name + " khrej mn " + prevlocation.name);
-        // console.log(this.name + " mcha l " + destination.name);
+        destination.people.push(this)
+        prevlocation.people = prevlocation.people.filter(person => person !== this);
+        console.log(`${this.name} left the ${prevlocation.name} and went to the ${destination.name}.`);
 
     }
     pay(treatment) {
-        console.log(this.name + ' curently in the pharmacy');
+        console.log(this.name + ' is currently in the pharmacy.');
         for (let i = 0; i < Pharmacy.products.length; i++) {
             if (this.illness == Pharmacy.products[i].illnessName) {
                 if (this.money >= Pharmacy.products[i].price) {
                     this.money -= Pharmacy.products[i].price
                     Pharmacy.products[i].money += Pharmacy.products[i].price
-                    console.log(this.name + "has left" + this.money);
                     this.healthState = 'well'
                     this.pocket.push(this.money)
-                    console.log("has in pocket " + this.pocket);
+                    console.log(`${this.name} paid €${Pharmacy.products[i].price}. Remaining money: €${this.money}`)
+                    console.log(`${this.name} is now healthy and has treatment "${treatment}" in their pocket.`);
                     break;
                 } else {
-                    this.GoTo(Pharmacy.people, cemetry.people)
+                    // this.GoTo(Pharmacy , cemetry )
+                    cemetry.people.push(this)
                     this.healthState = 'dead'
-                    console.log(this.name +' allah yerahmo ' + this.healthState);
+                    console.log(`${this.name} could not afford the treatment and has passed away.`);
                     break;
                 }
             }
@@ -59,15 +44,6 @@ let Optimus = new Patients("Optimus", "Unsave", 200, [], "Ill", []);
 let Sangoku = new Patients("Sangoku", "404", 80, [], "Ill", []);
 let DarthVader = new Patients("DarthVader", "Asthmatic", 110, [], "Ill", []);
 let Semicolon = new Patients("Semicolon", "SyntaxError", 60, [], "Ill", []);
-
-// ## Description of the doctor:
-
-// The doctor receives patients in his office. First, he diagnoses them and gets paid before prescribing a treatment. Note that the doctor always makes the patient leave his office before taking the next one. In his office, there is his Sphynx cat to maintain a sterile environment. The cat meows every two seconds in the console (bonus). The consultation costs 50€. Patients are in a treatment state before leaving the office.
-
-// | Name      | Money | Office | Diagnosis | Patient In | Patient Out |
-// |-----------|-------|--------|------------|------------|-------------|
-// | Debugger  | 0     | [Cat]  |            |            |             |
-
 class Doctor {
     constructor(name, money, office, waitingroom, consultationroom) {
         this.name = name
@@ -80,7 +56,8 @@ class Doctor {
         for (let i = 0; i < diagnosisGrid.length; i++) {
             if (patient.illness == diagnosisGrid[i].illnessName) {
                 patient.treatment.push(diagnosisGrid[i].treatment);
-                console.log("you have " + diagnosisGrid[i].illnessName);
+                console.log(`${patient.name} has been diagnosed with ${diagnosisGrid[i].illnessName}.`);
+                console.log(`Prescribed treatment: ${diagnosisGrid[i].treatment}`);
                 break;
             }
         }
@@ -88,19 +65,19 @@ class Doctor {
     PatientIn(patient) {
         if (this.consultationroom.people.length == 0) {
             this.consultationroom.people.push(patient);
-            console.log(patient.name + " in the " + this.consultationroom.name);
+            console.log(`${patient.name} entered the ${this.consultationroom.name}.`);
         } else {
             this.waitingroom.people.push(patient);
-            console.log(patient.name + " in the " + this.waitingroom.name);
+            console.log(`${patient.name} is waiting in the ${this.waitingroom.name}.`);
         }
 
     }
     Patientout(patient) {
         this.money += 50
         patient.money -= 50
-        console.log(patient.name + " pay 50€");
+        console.log(`${patient.name} paid €50 for the consultation.`);
         this.consultationroom.people.splice(patient, 1);
-        console.log(patient.name + " out of " + this.consultationroom.name);
+        console.log(`${patient.name} left the ${this.consultationroom.name}.`);
 
     }
 }
@@ -117,17 +94,6 @@ let consultationroom = {
     people: [],
 }
 const doctor = new Doctor("Debugger", 0, office, waitingroom, consultationroom);
-
-// ### Diagnosis Grid:
-
-// | Illness            | Treatment           |
-// |---------------------|---------------------|
-// | Indentation Error  | `Ctrl+Shift+F`      |
-// | Unsave             | `SaveOnFocusChange` |
-// | 404                | `CheckLinkRelation` |
-// | Asthmatic          | `Ventolin`          |
-// | Syntax Error       | `F12+Doc`           |
-
 const diagnosisGrid = [
     {
         illnessName: "IndentationError",
@@ -156,7 +122,6 @@ const diagnosisGrid = [
         price: 20,
     }
 ]
-// ## The Pharmacy:
 let Pharmacy = {
     name: "PharmaSphere",
     products: diagnosisGrid,
@@ -166,33 +131,23 @@ let Pharmacy = {
 }
 let home = {
     name: "home",
-    people: [Marcus, Optimus, Sangoku, DarthVader, Semicolon]
+    people: [Marcus, Optimus , Sangoku , DarthVader , Semicolon]
 }
 let cemetry = {
     name: "RIP",
     people: [],
 }
-Marcus.GoTo(home.people, doctor.office.people)
+Marcus.GoTo(home, doctor.office)
 doctor.PatientIn(Marcus)
-
-Optimus.GoTo(home.people, doctor.office.people)
+Optimus.GoTo(home, doctor.office)
 doctor.PatientIn(Optimus)
+doctor.diagnosis(Marcus)
 doctor.Patientout(Marcus)
-Marcus.pay('Ctrl+Shift+F')
-// doctor.diagnosis(Optimus)
-// doctor.waitingroom.people.push(Marcus)
-// Patients will then go to the pharmacy and receive their treatment if they have enough money. If they have enough money, they will be in good health; otherwise, they will be dead, and you will need to push them into a cemetery.
+Marcus.GoTo(doctor.office , Pharmacy)
+Marcus.pay(Marcus.treatment[0]);
+doctor.PatientIn(Optimus)
+doctor.diagnosis(Optimus)
+doctor.Patientout(Optimus)
+Optimus.GoTo(doctor.office , Pharmacy)
+Optimus.pay(Optimus.treatment[0]);
 
-// ### Treatment Rates:
-
-// | Treatment           | Price |
-// |---------------------|-------|
-// | `Ctrl+Shift+F`      | 60€   |
-// | `SaveOnFocusChange` | 100€  |
-// | `CheckLinkRelation` | 35€   |
-// | `Ventolin`          | 40€   |
-// | `F12+Doc`           | 20€   |
-
-// # Verification:
-
-// Thanks to your debugger, follow the evolution of each patient. Make sure they leave the waiting room each time before entering the doctor's office, and they should leave the office before letting someone else enter.
